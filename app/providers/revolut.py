@@ -20,7 +20,7 @@ def parse_money_value(money: str) -> Decimal:
 class Revolut(TransactionProvider, TransferProvider):
     folder: str
 
-    def __init__(self, folder: str = "data/investing/revolut", print_invalid_lines: bool = True):
+    def __init__(self, folder: str = "data/investing/revolut", print_invalid_lines: bool = False):
         self.folder = folder
         self.print_invalid_lines = print_invalid_lines
 

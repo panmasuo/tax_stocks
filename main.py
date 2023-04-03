@@ -16,12 +16,11 @@ Example: python main.py 2021"""
 
 
 def main():
-    # try:
-    #     year = int(sys.argv[1])
-    # except (IndexError, ValueError):
-    #     help()
-    #     return
-    year = 2022
+    try:
+        year = int(sys.argv[1])
+    except (IndexError, ValueError):
+        help()
+        return
     revolut = app.Revolut()
 
     # === Stocks ===
