@@ -126,9 +126,9 @@ class Account:
 
     def do_transaction(self, transaction: Transaction):
         position = self._get_position(transaction.symbol)
-        if transaction.activity == Activity.BUY:
+        if transaction.activity in [Activity.BUY, Activity.BUY_MARKET]:
             position.buy(transaction.quantity, transaction.price, transaction.settle_date, transaction.currency)
-        elif transaction.activity == Activity.SELL:
+        elif transaction.activity in [Activity.SELL, Activity.SELL_MARKET]:
             realized_changes = position.sell(transaction.quantity, transaction.price, transaction.settle_date)
             self._add_change(transaction.symbol, realized_changes)
         elif transaction.activity == Activity.SSP:

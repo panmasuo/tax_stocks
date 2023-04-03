@@ -2,7 +2,7 @@ import csv
 from typing import List
 import datetime
 from decimal import Decimal
-from os import listdir, stat
+from os import listdir
 from os.path import isfile, join
 
 from app.transaction import Transaction, Activity
@@ -12,10 +12,15 @@ from app.transfer import Operation, Transfer
 from app.exchange import Currency
 
 
+def parse_money_value(money: str) -> Decimal:
+    parsed_money = money.replace('$', '').replace(',', '').replace('"', '')
+    return Decimal(parsed_money)
+
+
 class Revolut(TransactionProvider, TransferProvider):
     folder: str
 
-    def __init__(self, folder: str = "data/investing/revolut", print_invalid_lines: bool = False):
+    def __init__(self, folder: str = "data/investing/revolut", print_invalid_lines: bool = True):
         self.folder = folder
         self.print_invalid_lines = print_invalid_lines
 
@@ -77,7 +82,11 @@ class Revolut(TransactionProvider, TransferProvider):
                 return []
             for row in reader:
                 # Date,Ticker,Type,Quantity,Price per share,Total Amount,Currency,FX Rate
-                date = datetime.datetime.strptime(row[0].split(" ")[0], "%d/%m/%Y")
+                try:
+                    # report generated in march 2023 was using this timestamp
+                    date = datetime.datetime.strptime(row[0], '%Y-%m-%dT%H:%M:%S.%fZ')
+                except ValueError:  # rollback to old method
+                    date = datetime.datetime.strptime(row[0].split(" ")[0], "%d/%m/%Y")
 
                 try:
                     activity = Activity(row[2])
@@ -87,7 +96,7 @@ class Revolut(TransactionProvider, TransferProvider):
                 if activity is Activity.DIV:
                     quantity = Decimal(0)
                     price = Decimal(0)
-                    amount = Decimal(row[5])
+                    amount = parse_money_value(row[5])
                     # Note: assumption here is that only US stocks were bought, therefore 15% tax.
                     original_value = round((amount / Decimal(85.0)) * 100, 2)
                     dividend_tax_deducted = round(original_value - amount, 2)
@@ -98,8 +107,8 @@ class Revolut(TransactionProvider, TransferProvider):
                     dividend_tax_deducted = Decimal(0)
                 else:
                     quantity = Decimal(row[3])
-                    price = Decimal(row[4])
-                    amount = Decimal(row[5])
+                    price = parse_money_value(row[4])
+                    amount = parse_money_value(row[5])
                     dividend_tax_deducted = Decimal(0)
 
                 currency = Currency(row[6])
