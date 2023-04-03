@@ -16,22 +16,22 @@ Example: python main.py 2021"""
 
 
 def main():
-    try:
-        year = int(sys.argv[1])
-    except (IndexError, ValueError):
-        help()
-        return
-
+    # try:
+    #     year = int(sys.argv[1])
+    # except (IndexError, ValueError):
+    #     help()
+    #     return
+    year = 2022
     revolut = app.Revolut()
 
     # === Stocks ===
 
-    transaction_providers: list[TransactionProvider] = [
+    transaction_providers: List[TransactionProvider] = [
         app.Degiro(),
         revolut,
     ]
 
-    transactions: list[Transaction] = []
+    transactions: List[Transaction] = []
     for transaction_provider in transaction_providers:
         transactions += transaction_provider.provide_transactions()
 
@@ -52,7 +52,7 @@ def main():
 
     # === Crypto ===
 
-    transfer_providers: list[TransferProvider] = [
+    transfer_providers: List[TransferProvider] = [
         revolut,
         app.Binance(),
     ]
